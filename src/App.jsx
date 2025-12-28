@@ -11,7 +11,7 @@ const LS_KEY = "dedicatoria-player:v1";
 const ONBOARDING_KEY = "kuskatan_onboarding_v1";
 
 // 🚨 DEBUG: Poner en false antes de deploy
-const DEBUG_ONBOARDING = true;
+const DEBUG_ONBOARDING = false;
 
 function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n));

@@ -2,14 +2,16 @@
 // TIP: mete tus archivos en /public/media/ (mp3) y /public/covers/ (jpg/png/jfif)
 // y pon las rutas como: "/media/01.mp3" y "/covers/01.jpg"
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 export const TRACKS = [
   {
     id: "01",
     title: "Cién años",
     artist: "Pedro Infante",
     album: "15 Inmortales",
-    src: "/media/01.mp3",
-    cover: "/covers/01.jpg",
+    src: `${BASE_URL}media/01.mp3`,
+    cover: `${BASE_URL}covers/01.jpg`,
     dedication: `"Pasaste a mi lado con gran indiferencia, tus ojos ni siquiera voltearon hacia a mí"
 
 Recuerdo cuando te vi por primera vez, te veías tan seria y tan concentrada en tu trabajo, y yo solo podía verte e imaginarme cómo sería conocerte, cómo sería hacerte reír y cómo sería hacerte enojar. En ese momento, literal:
@@ -63,8 +65,8 @@ Cien años, pienso en ti`,
     title: "Beso de desayuno",
     artist: "Calle 13",
     album: "Residente o visitante",
-    src: "/media/02.mp3",
-    cover: "/covers/02.jfif",
+    src: `${BASE_URL}media/02.mp3`,
+    cover: `${BASE_URL}covers/02.jfif`,
     dedication: `Nunca me ha gustado el personaje que el actual "Residente" representa dentro del mundillo del HipHop, pero... debo admitir que "Calle 13" tiene canciones que pasa el tiempo y no dejan de representar algo, entre esas canciones esta la que actualmente estas escuchando. 
 
 "Quiero caminar por encima de tu pelo hasta llegar al ombligo de tu oreja y recitarte un poquito de costillas y regalarte una sabana de almejas" 
@@ -179,8 +181,8 @@ Y con un fricasé de acerola`,
     title: "Pruébame a Ti",
     artist: "Jósean Log",
     album: "El tiempo lo cura todo",
-    src: "/media/03.mp3",
-    cover: "/covers/03.jfif",
+    src: `${BASE_URL}media/03.mp3`,
+    cover: `${BASE_URL}covers/03.jfif`,
     dedication: `Cuando escuché esta canción no pude evitar pensar en nosotros, sobre todo con el contexto del trabajo, porque parece que a estas alturas todos nos "shipean" y eso a mí no me molesta, siempre y cuando ninguno de esos comentarios llegue a afectarnos; está bien.
 
 Yo siempre he sido de pensar que uno nunca sabe si el día de mañana va a conocer a la persona destinada para su vida.
@@ -228,8 +230,8 @@ Acércate y pruébame a ti`,
     title: "Eres para mi",
     artist: "Julieta Venegas",
     album: "Limón y Sal",
-    src: "/media/04.mp3",
-    cover: "/covers/04.jpg",
+    src: `${BASE_URL}media/04.mp3`,
+    cover: `${BASE_URL}covers/04.jpg`,
     dedication: `"Tú eres para mí y yo soy para ti"
 
 Me lo dijo un pajarito colochito y chambrosito jajajaja xD (Roberto) jaja, bromas.
@@ -315,8 +317,8 @@ Yo soy para ti`,
     title: "A la medida",
     artist: "Ricardo Arjona",
     album: "Independiente",
-    src: "/media/05.mp3",
-    cover: "/covers/05.jpg",
+    src: `${BASE_URL}media/05.mp3`,
+    cover: `${BASE_URL}covers/05.jpg`,
     dedication: `Me dijiste que uno de tus artistas favoritos es Ricardo Arjona, y algo que siempre me ha gustado de Arjona es que tiene una capacidad de composición muy buena, también es muy bueno utilizando figuras literarias y muy bueno para hacerte pensar fuera de la caja. Por ejemplo:
 
 "A la medida"
@@ -377,8 +379,8 @@ A la medida`,
     title: "Eres mi religión",
     artist: "Maná",
     album: "Revolución de amor",
-    src: "/media/06.mp3",
-    cover: "/covers/06.jpg",
+    src: `${BASE_URL}media/06.mp3`,
+    cover: `${BASE_URL}covers/06.jpg`,
     dedication: `Cuando comencé a trabajar en ALMAPAC (Almacenadora del Pacífico...), al inicio ni ganas me daban de ir a trabajar; más que bien pesado me tocaba, andar de arriba abajo aprendiendo y tomando apuntes de todo lo que se tenía que hacer. Era cansado. La verdad ni me gustaba ir en el micro porque no soy muy sociable y sentía que les iba a caer mal a todos porque yo soy raro a veces, o eso dice la gente, pero...
 
 "Vivía sin sentido, pero llegaste tú" y "Apareciste con tu luz"
@@ -467,8 +469,8 @@ Eres mi luz, eres mi sol`,
     title: "Iris",
     artist: "Goo Goo Dolls",
     album: "Dizzy up the Girl",
-    src: "/media/07.mp3",
-    cover: "/covers/07.png",
+    src: `${BASE_URL}media/07.mp3`,
+    cover: `${BASE_URL}covers/07.png`,
     dedication: `Sé que después de leer las dedicatorias y escuchar las canciones te estás preguntando: "¿Qué ondas con este bicho, mano? ¿Será que le gusto? Pero no creo, porque es hombre y todos los hombres mienten".
 
 Jajaja xD. De seguro es lo que pensaste, pero la verdad es que no escribo esto para que pienses que necesitamos cambiar lo que tenemos o ponerle título extra a nuestra amistad, porque siempre he pensado que las cosas buenas se construyen con el tiempo, y que lo que fácil llega también fácil se va. Aun así, me gustaría que sigamos construyendo nuestra amistad sin presión, a nuestro ritmo, y que el tiempo sea quien decida si conocernos fue destino o solo una coincidencia.
