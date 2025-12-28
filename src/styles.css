@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+/* Mejoras para móvil */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* Animaciones personalizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Temas dark/light */
+.theme-dark {
+  color: rgb(241 245 249); /* slate-100 */
+}
+
+.theme-dark .dark-overlay {
+  opacity: 0.2;
+}
+
+.theme-dark .light-overlay {
+  opacity: 0;
+}
+
+.theme-light {
+  color: rgb(15 23 42); /* slate-900 */
+}
+
+.theme-light .dark-overlay {
+  opacity: 0;
+}
+
+.theme-light .light-overlay {
+  opacity: 0.3;
+}
+
+/* Clases helper para cards en modo light */
+.theme-light .glass-card {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.theme-light .text-primary {
+  color: rgb(15 23 42); /* slate-900 */
+}
+
+.theme-light .text-secondary {
+  color: rgb(71 85 105); /* slate-600 */
+}
+
+.theme-light .text-muted {
+  color: rgb(100 116 139); /* slate-500 */
+}
