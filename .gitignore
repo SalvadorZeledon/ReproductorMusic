@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Vite cache
+.vite/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment variables
+.env
+.env.*.local
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+
+# Optional: local history plugins
+.history/
+
+# Optional: coverage
+coverage/
+
+# Optional: lockfiles (NO ignores by default)
+# Keep your package-lock.json / pnpm-lock.yaml / yarn.lock tracked
+
+# Optional: Netlify (if you ever use it)
+.netlify/
