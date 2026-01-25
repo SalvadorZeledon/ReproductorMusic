@@ -38,3 +38,6 @@ coverage/
 
 # Optional: Netlify (if you ever use it)
 .netlify/
+
+# Private data (números telefónicos, etc.)
+src/private/*.local.js

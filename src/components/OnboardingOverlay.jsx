@@ -1,37 +1,33 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Music2, Heart, ListOrdered } from "lucide-react";
+import { ChevronLeft, ChevronRight, Music2, Heart, ListOrdered, CloudRain } from "lucide-react";
 
-const SLIDES = [
+// Mapeo de nombres de iconos a componentes
+const ICON_MAP = {
+  Heart,
+  Music2,
+  ListOrdered,
+  CloudRain,
+};
+
+// Slides por defecto (fallback si no se pasan props)
+const DEFAULT_SLIDES = [
   {
-    icon: Heart,
-    title: "Hola! corazón de melón. 💛🍈",
-    content: "Quería hacer algo especial para ti, algo diferente, algo que cuando lo veas pienses en mi así como yo desarrolle este proyecto pensando en ti.\n\nCreo que ahora entiendes porque te dije que el regalo no era algo tangible pero aun así es algo que existe. jajaj xD",
-  },
-  {
-    icon: Music2,
-    title: "Algo diferente para una chica diferente. ✨🚌🎧",
-    content: "Algo que disfruto mucho siempre, es ir junto a ti en el micro y escuchar música juntos. Ese es mi momento lindo del día, siempre escuchamos canciones que te gustan o que te gustaría que yo conozca.\n\nEntonces quisé hacer lo mismo y agrupe canciones de distintos generos, algunas no tienen nada en comun una con la otra pero... lo que tienen en comun todas es que cuando las escuche me hicieron pensar en ti. Asique te las quiero dedicar en este momento.",
-  },
-  {
-    icon: ListOrdered,
-    title: "Indicaciones:",
-    bullets: [
-      "Las canciones tienen un orden, por eso van numeradas.",
-      "Todas las canciones tienen su respectiva dedicatoria (leelas)",
-      "Todas las canciones cuentan con letra y traducción si así lo requieren, por si quieres prestarle mas atención a la letra.",
-      "Sin nada más que decir, espero las disfrutes.",
-    ],
-    callout: "Para una mejor experiencia se recomienda el uso de auriculares.",
+    icon: "Heart",
+    title: "Bienvenido/a",
+    content: "Gracias por estar aquí.",
   },
 ];
 
-export default function OnboardingOverlay({ open, onClose }) {
+export default function OnboardingOverlay({ open, onClose, slides }) {
   const [isVisible, setIsVisible] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
+
+  // Usar slides de props o fallback
+  const SLIDES = slides && slides.length > 0 ? slides : DEFAULT_SLIDES;
 
   // Animación de entrada
   useEffect(() => {
@@ -130,7 +126,8 @@ export default function OnboardingOverlay({ open, onClose }) {
   if (!open) return null;
 
   const slide = SLIDES[currentSlide];
-  const Icon = slide.icon;
+  // Resolver el icono: puede ser string (nombre) o componente directo
+  const Icon = typeof slide.icon === "string" ? ICON_MAP[slide.icon] || Heart : slide.icon;
 
   return (
     <div
@@ -163,7 +160,8 @@ export default function OnboardingOverlay({ open, onClose }) {
             }}
           >
             {SLIDES.map((s, idx) => {
-              const SlideIcon = s.icon;
+              // Resolver icono para cada slide
+              const SlideIcon = typeof s.icon === "string" ? ICON_MAP[s.icon] || Heart : s.icon;
               return (
                 <div
                   key={idx}

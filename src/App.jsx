@@ -1,17 +1,29 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { TRACKS } from "./tracks";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import {
+  getModeData,
+  getSavedMode,
+  saveMode,
+  clearMode,
+  getPlayerLSKey,
+  getOnboardingLSKey,
+} from "./modes";
 import Player from "./components/Player";
 import Playlist from "./components/Playlist";
 import LyricsModal from "./components/LyricsModal";
 import BackgroundLayer from "./components/BackgroundLayer";
 import OnboardingOverlay from "./components/OnboardingOverlay";
-import { Music2, Sparkles } from "lucide-react";
-
-const LS_KEY = "dedicatoria-player:v1";
-const ONBOARDING_KEY = "kuskatan_onboarding_v1";
+import DecisionWizard from "./components/DecisionWizard";
+import {
+  WelcomeModal,
+  CompletedModal,
+  useYesModeModals,
+  clearYesModeProgress,
+} from "./components/YesModeModals";
+import { Music2, Sparkles, RotateCcw } from "lucide-react";
 
 // 🚨 DEBUG: Poner en false antes de deploy
 const DEBUG_ONBOARDING = false;
+const DEBUG_WIZARD = false; // Forzar mostrar wizard aunque haya modo guardado
 
 function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n));
@@ -20,6 +32,18 @@ function clamp(n, min, max) {
 export default function App() {
   const audioRef = useRef(null);
 
+  // Estado del modo (yes/no/null)
+  const [mode, setMode] = useState(() => {
+    if (DEBUG_WIZARD) return null;
+    return getSavedMode();
+  });
+
+  // Obtener datos del modo actual
+  const modeData = useMemo(() => getModeData(mode), [mode]);
+  const tracks = modeData?.tracks ?? [];
+  const config = modeData?.config ?? null;
+
+  // Estados del reproductor
   const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [repeatMode, setRepeatMode] = useState("off"); // off | all | one
@@ -29,43 +53,52 @@ export default function App() {
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const track = useMemo(() => TRACKS[index] ?? TRACKS[0], [index]);
+  const track = useMemo(() => tracks[index] ?? tracks[0] ?? null, [tracks, index]);
 
-  // Verificar si debe mostrar onboarding
+  // Cargar estado guardado POR MODO
   useEffect(() => {
-    // Modo DEBUG: siempre muestra el onboarding (ignora localStorage)
-    if (DEBUG_ONBOARDING) {
-      setShowOnboarding(true);
-      return;
-    }
+    if (!mode) return;
 
-    // Modo PRODUCCIÓN: solo muestra si no lo ha visto antes
-    const hasSeenOnboarding = localStorage.getItem(ONBOARDING_KEY);
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
-    }
-  }, []);
-
-  // Cargar estado guardado
-  useEffect(() => {
+    const lsKey = getPlayerLSKey(mode);
     try {
-      const raw = localStorage.getItem(LS_KEY);
+      const raw = localStorage.getItem(lsKey);
       if (!raw) return;
       const saved = JSON.parse(raw);
-      if (typeof saved.index === "number") setIndex(clamp(saved.index, 0, TRACKS.length - 1));
+      if (typeof saved.index === "number") setIndex(clamp(saved.index, 0, tracks.length - 1));
       if (typeof saved.repeatMode === "string") setRepeatMode(saved.repeatMode);
       if (typeof saved.volume === "number") setVolume(clamp(saved.volume, 0, 1));
       if (typeof saved.muted === "boolean") setMuted(saved.muted);
     } catch {
       // ignore
     }
-  }, []);
+  }, [mode, tracks.length]);
 
-  // Guardar estado
+  // Guardar estado POR MODO
   useEffect(() => {
+    if (!mode) return;
+
+    const lsKey = getPlayerLSKey(mode);
     const payload = { index, repeatMode, volume, muted };
-    localStorage.setItem(LS_KEY, JSON.stringify(payload));
-  }, [index, repeatMode, volume, muted]);
+    localStorage.setItem(lsKey, JSON.stringify(payload));
+  }, [mode, index, repeatMode, volume, muted]);
+
+  // Verificar si debe mostrar onboarding POR MODO
+  useEffect(() => {
+    if (!mode) return;
+
+    // Modo DEBUG: siempre muestra el onboarding
+    if (DEBUG_ONBOARDING) {
+      setShowOnboarding(true);
+      return;
+    }
+
+    // Modo PRODUCCIÓN: solo muestra si no lo ha visto para este modo
+    const onboardingKey = getOnboardingLSKey(mode);
+    const hasSeenOnboarding = localStorage.getItem(onboardingKey);
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, [mode]);
 
   // Sync volumen
   useEffect(() => {
@@ -76,15 +109,22 @@ export default function App() {
 
   // Cambiar track
   useEffect(() => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !track) return;
     audioRef.current.src = track.src;
     audioRef.current.load();
     if (isPlaying) {
       audioRef.current.play().catch(() => setIsPlaying(false));
     }
-  }, [track.src]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [track?.src]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onEnded = () => {
+    if (tracks.length === 0) return;
+
+    // Marcar track actual como escuchado (para modo YES)
+    if (track?.id) {
+      yesModeModals.markTrackPlayed(track.id);
+    }
+
     // REPEAT_ONE: Repite la misma canción
     if (repeatMode === "one") {
       audioRef.current.currentTime = 0;
@@ -94,13 +134,13 @@ export default function App() {
 
     // REPEAT_ALL: Si es la última canción, vuelve a la primera
     if (repeatMode === "all") {
-      const nextIndex = (index + 1) % TRACKS.length;
+      const nextIndex = (index + 1) % tracks.length;
       setIndex(nextIndex);
       return;
     }
 
     // OFF: Si no es la última, avanza; si es la última, se detiene
-    if (index < TRACKS.length - 1) {
+    if (index < tracks.length - 1) {
       setIndex(index + 1);
     } else {
       setIsPlaying(false);
@@ -123,15 +163,24 @@ export default function App() {
     }
   };
 
-  const prev = () => setIndex((i) => (i - 1 + TRACKS.length) % TRACKS.length);
-  const next = () => setIndex((i) => (i + 1) % TRACKS.length);
+  const prev = () => {
+    if (tracks.length === 0) return;
+    setIndex((i) => (i - 1 + tracks.length) % tracks.length);
+  };
+
+  const next = () => {
+    if (tracks.length === 0) return;
+    setIndex((i) => (i + 1) % tracks.length);
+  };
 
   const cycleRepeat = () => {
     setRepeatMode((r) => (r === "off" ? "all" : r === "all" ? "one" : "off"));
   };
 
   const handleCloseOnboarding = () => {
-    localStorage.setItem(ONBOARDING_KEY, "true");
+    if (!mode) return;
+    const onboardingKey = getOnboardingLSKey(mode);
+    localStorage.setItem(onboardingKey, "true");
     setShowOnboarding(false);
   };
 
@@ -139,6 +188,64 @@ export default function App() {
     setShowOnboarding(true);
   };
 
+  // Manejar decisión del wizard
+  const handleWizardComplete = useCallback((choice) => {
+    // Pausar audio si estaba sonando
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    setIsPlaying(false);
+    setIndex(0);
+
+    // Guardar modo
+    saveMode(choice);
+    setMode(choice);
+  }, []);
+
+  // Volver al wizard (botón debug/cambiar decisión)
+  const handleResetMode = useCallback(() => {
+    // Pausar audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    setIsPlaying(false);
+    setIndex(0);
+
+    // Limpiar progreso del modo YES si estamos en él
+    clearYesModeProgress();
+
+    // Limpiar modo
+    clearMode();
+    setMode(null);
+  }, []);
+
+  // Hook para modales específicos del modo YES
+  const yesModeModals = useYesModeModals(mode, tracks, handleResetMode);
+
+  // Si no hay modo, mostrar el wizard
+  if (!mode || !modeData || !track) {
+    return (
+      <div
+        className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900"
+        style={{
+          "--accent": "#a78bfa",
+          "--accent2": "#ec4899",
+          "--ui-bg": "rgba(10,14,25,0.55)",
+          "--ui-card": "rgba(255,255,255,0.06)",
+          "--ui-card-2": "rgba(255,255,255,0.08)",
+          "--ui-border": "rgba(255,255,255,0.12)",
+          "--ui-border-strong": "rgba(255,255,255,0.18)",
+          "--ui-text": "rgba(255,255,255,0.92)",
+          "--ui-muted": "rgba(255,255,255,0.65)",
+          "--ui-muted2": "rgba(255,255,255,0.45)",
+        }}
+      >
+        <DecisionWizard onComplete={handleWizardComplete} />
+      </div>
+    );
+  }
+
+  // Estilos dinámicos basados en el track actual
   const [c0, c1, c2, c3] = track.theme?.colors || ["#ffffff", "#94a3b8", "#ffffff", "#94a3b8"];
   const isLightMode = track.theme?.mode === "light";
 
@@ -188,23 +295,36 @@ export default function App() {
               }}
             >
               <Music2 className="h-4 w-4" />
-              <span>7 canciones • letras • dedicatorias</span>
+              <span>{config.ui.badgeText}</span>
             </div>
             <h1
               className="mt-3 text-2xl font-semibold tracking-tight md:text-4xl"
               style={{ color: "var(--ui-text)" }}
             >
-              Un reproductor dedicado solo para ti. <span className="align-middle">🎵💝</span>
+              {config.ui.title} <span className="align-middle">{config.ui.titleEmoji}</span>
             </h1>
             <p
               className="mt-2 max-w-xl text-sm md:text-base"
               style={{ color: "var(--ui-muted)" }}
             >
-              Siempre que escucho estas canciones pienso en ti, espero te guste. 💕
+              {config.ui.subtitle}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Botón discreto para cambiar decisión (debug) */}
+            <button
+              onClick={handleResetMode}
+              className="rounded-xl px-3 py-2 text-xs ring-1 hover:opacity-80 transition-all opacity-40 hover:opacity-70"
+              style={{
+                backgroundColor: "var(--ui-card)",
+                borderColor: "var(--ui-border)",
+                color: "var(--ui-muted)",
+              }}
+              title="Cambiar decisión"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
             <button
               onClick={handleOpenOnboarding}
               className="rounded-xl px-3 py-2 text-xs ring-1 hover:opacity-80 transition-all"
@@ -269,12 +389,12 @@ export default function App() {
                 Lista
               </h2>
               <span className="text-xs" style={{ color: "var(--ui-muted)" }}>
-                {TRACKS.length} canciones
+                {tracks.length} canciones
               </span>
             </div>
 
             <Playlist
-              tracks={TRACKS}
+              tracks={tracks}
               currentIndex={index}
               onPick={(i) => setIndex(i)}
             />
@@ -288,11 +408,11 @@ export default function App() {
               }}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm">📖💕</span>
+                <span className="text-sm">{config.ui.playlistHintEmoji}</span>
                 <span className="font-medium" style={{ color: "var(--ui-text)" }}>Cada canción tiene su historia</span>
               </div>
               <p className="mt-1" style={{ color: "var(--ui-muted)" }}>
-                No te saltes las dedicatorias, ahí está lo importante. Escribí lo que sentí al escuchar cada una pensando en ti.
+                {config.ui.playlistHint}
               </p>
             </div>
           </div>
@@ -307,13 +427,29 @@ export default function App() {
         <OnboardingOverlay
           open={showOnboarding}
           onClose={handleCloseOnboarding}
+          slides={config.onboarding}
         />
 
         <audio ref={audioRef} preload="metadata" onEnded={onEnded} />
         <footer className="mt-8 text-center text-xs" style={{ color: "var(--ui-muted2)" }}>
-          Hecho por Salvador Zeledón en dedicatoria para Gabriela Pimentel 💕
+          {config.ui.footerText}
         </footer>
       </div>
+
+      {/* Modales específicos del modo YES */}
+      {mode === "yes" && (
+        <>
+          <WelcomeModal
+            open={yesModeModals.showWelcome}
+            onClose={yesModeModals.closeWelcome}
+          />
+          <CompletedModal
+            open={yesModeModals.showCompleted}
+            onClose={yesModeModals.closeCompleted}
+            onReset={yesModeModals.handleReset}
+          />
+        </>
+      )}
     </div>
   );
 }
