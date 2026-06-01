@@ -11,6 +11,7 @@ export function isAuthenticated() {
     return false;
   }
 }
+//prueba
 
 export default function PasswordModal({ onUnlock }) {
   const [value, setValue] = useState("");
