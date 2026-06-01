@@ -20,15 +20,11 @@ import { validateNumber } from "../private";
 const WELCOME_CONTENT = {
   title: "Bienvenida ✨",
   lines: [
-    "Antes de desbloquear las nuevas canciones, necesito que completes una dinámica rápida. 🧩",
-    "Son unas preguntas que te permitirán desbloquear un reproductor con canciones, letras y dedicatorias. 🎶💌",
-    "Al final tendrás que responder una pregunta muy importante.",
-    "Este proyecto tiene DOS reproductores: cada uno fue diseñado según la respuesta que elijas. 👀",
-    "Importante: responderás sin saber qué te espera después.",
-    "Cuando elijas, se te mostrará el reproductor que desbloqueaste… y el otro será destruido para siempre. 🗝️🔥",
-    "Nunca sabrás qué había en el otro.",
+    "Este reproductor fue hecho especialmente para ti. 🎶💌",
+    "Dentro encontrarás canciones con sus letras y dedicatorias.",
+    "Cada canción tiene su propia historia y fue elegida con cuidado. 🎵",
   ],
-  buttonText: "Entiendo y quiero continuar ✅",
+  buttonText: "Entrar ✨",
 };
 
 // Paso 1: Preguntas del "Nivel Fácil"
@@ -438,7 +434,7 @@ export default function DecisionWizard({ onComplete }) {
       {/* Botón fijo abajo */}
       <div className="shrink-0 px-5 sm:px-6 pb-5 sm:pb-6 pt-3 border-t border-white/5">
         <button
-          onClick={() => setCurrentView("quiz")}
+          onClick={() => handleDecision("yes")}
           className="w-full px-6 py-3.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]"
           style={{
             background: "linear-gradient(135deg, #a78bfa 0%, #ec4899 100%)",

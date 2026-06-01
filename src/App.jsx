@@ -19,6 +19,7 @@ import {
   useYesModeModals,
   clearYesModeProgress,
 } from "./components/YesModeModals";
+import PasswordModal, { isAuthenticated } from "./components/PasswordModal";
 import { Music2, Sparkles, RotateCcw } from "lucide-react";
 
 // 🚨 DEBUG: Poner en false antes de deploy
@@ -31,6 +32,8 @@ function clamp(n, min, max) {
 
 export default function App() {
   const audioRef = useRef(null);
+
+  const [unlocked, setUnlocked] = useState(() => isAuthenticated());
 
   // Estado del modo (yes/no/null)
   const [mode, setMode] = useState(() => {
@@ -221,6 +224,10 @@ export default function App() {
 
   // Hook para modales específicos del modo YES
   const yesModeModals = useYesModeModals(mode, tracks, handleResetMode);
+
+  if (!unlocked) {
+    return <PasswordModal onUnlock={() => setUnlocked(true)} />;
+  }
 
   // Si no hay modo, mostrar el wizard
   if (!mode || !modeData || !track) {

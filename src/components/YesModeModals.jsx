@@ -20,7 +20,7 @@ porque cada vez que me quieres yo te quiero y
 porque cada vez que tu dudas yo dudo...`;
 
 // Mensaje de finalización
-const COMPLETED_MESSAGE = `Si lees esto es porque terminas de escuchar todas las canciones, gracias por tomarte el tiempo. Pero esto no termina aquí, te recuerdo que tienes a un chico que te quiere mucho pensando en ti en este momento, creo que sería justo que lo llames
+const COMPLETED_MESSAGE = `Si lees esto es porque terminas de escuchar todas las canciones, gracias por tomarte el tiempo. Pero esto no termina aquí yo te dije que eran 3 detalles y este es el segundo, si quieres saber cual hace falta te recuerdo que tienes a un chico que seguramente esta pensando en ti en este momento, creo que sería justo que lo llames. 
 
 tu no lo sabes pero el esta esperando tu llamada en este momento`;
 
